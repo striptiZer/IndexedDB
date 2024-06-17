@@ -5,55 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <title>Option Manager</title>
+    <style>
+        .maindiv{
+            margin: 40px 0px 0px 40px;
+        }
+        .divcontent {
+            padding: 25px 25px 0px 25px;
+            border: 2px solid rgb(1, 81, 1);
+            border-radius: 15px;
+            height: 350px;
+            width: 550px;
+            margin: 25px 25px 0px 25px ;
+        }
+        .button {
+            margin: 10px 10px 10px 10px;
+        }
+        .float{
+            float: left;
+        }
+        .spname{
+            width: 105px;
+        }
+    </style>
 </head>
 <body>
-    <div style="width: 400px; margin: 25px 0px 10px 35px;">
-         <h4>Add data to database indexedDB</h4>
-        <table class="table table-bordered" id="pip">
-            <tr>
-                <td>dima</td>
-                <td>35</td>
-                <td>777</td>
-            </tr>
-            <tr>
-                <td>nasty</td>
-                <td>23</td>
-                <td>77</td>
-            </tr>
-            <tr>
-                <td>nikitos</td>
-                <td>7</td>
-                <td>7</td>
-            </tr>
-        </table>
-    <button id="addbase" class="btn btn-primary">addbase</button>
-<br>
-<div style="width: 450px; margin: 45px 0px 10px 35px;">
-    <div class="input-group">
-        <h4>Delete data from database indexedDB</h4>
-        <span class="input-group-text">inter name</span>
-        <input id="data" type="text" aria-label="First name" class="form-control" onfocus="this.value=''">
-        <button id="delete" class="btn btn-danger" style="margin-left: 15px;">delete</button>
-      </div>
-    
+<div class="maindiv">
+    <div class="divcontent float">
+        <h4>Name database</h4>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-default">Activate database</span>
+            <input id="databaseName" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
+        <button id="adddatabase" class="btn btn-primary button">add database</button>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-default">Add Name</span>
+            <input id="inputName" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
+        <button id="addbase" class="btn btn-primary button">add data</button>
+        <br>
+    </div>
+    <div class="divcontent float">
+        <h4>Delete data from database</h4>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-default">Delete Name</span>
+            <input id="data" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
+        <button id="delete" class="btn btn-danger button">delete data</button>
+        <br>
+        <h4>Delete database</h4>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-default">Delete Database</span>
+            <input id="databased" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
+        <button id="deleteDatabase" class="btn btn-danger button">delete database</button>
+    </div>
+    <div class="divcontent float">
+        <h4>Data databases</h4>
+        <button id="showdata" class="btn btn-primary button">show data</button>
+        <button id="showdatabase" class="btn btn-primary button">show databases</button>
+        <textarea type="text" id="database" class="form-control" readonly rows="7"></textarea>
+    </div>
 </div>
-</div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="javascript.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="javascript.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
