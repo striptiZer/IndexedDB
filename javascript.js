@@ -1,70 +1,141 @@
 $(document).ready(function() {
     let db;
 
-    $("#adddatabase").click(function() {
-        const dbName = $("#databaseName").val();
+$("#adddatabase").click(function() {
+    const dbName = $("#databaseNameAdd").val();
+
+    if (dbName) {
+        const version = 1;
+        const request = indexedDB.open(dbName, version);
+
+        request.onupgradeneeded = function(event) {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains("list")) {
+                const objectStore = db.createObjectStore("list", { keyPath: "ssn", autoIncrement: true });
+                objectStore.createIndex("name", "name", { unique: false });
+            }
+        };
+
+        request.onsuccess = function(event) {
+            db = event.target.result;
+            console.log("Database opened successfully:", db.name);
+        };
+
+        request.onerror = function(event) {
+            console.error("Database error:", event.target.errorCode);
+        };
+    } else {
+        alert("Please enter a valid database name.");
+    }
+});
+
+    $('#activatedatabase').click(function() {
+        const dbName = $('#databaseNameAct').val().trim();
 
         if (dbName) {
-            const request = indexedDB.open(dbName, 2);
-
-            request.onupgradeneeded = function(event) {
-                db = event.target.result;
-                if (!db.objectStoreNames.contains("listPip")) {
-                    const objectStore = db.createObjectStore("listPip", { keyPath: "ssn", autoIncrement: true });
-                    objectStore.createIndex("name", "name", { unique: false });
-                }
-            };
-
-            request.onsuccess = function(event) {
-                db = event.target.result;
-                console.log("Database opened successfully:", db.name);
-            };
-
-            request.onerror = function(event) {
-                console.error("Database error:", event.target.errorCode);
-            };
+            activateDatabase(dbName);
         } else {
-            alert("Please enter a valid database name.");
+            alert('Please enter a database name.');
         }
     });
 
-    $("#addbase").click(function() {
-        const dbName = $("#databaseName").val();
-        const name = $("#inputName").val();
+    function activateDatabase(dbName) {
+        if (!window.indexedDB) {
+            return;
+        }
 
-        if (dbName && name) {
-            const transaction = db.transaction(["listPip"], "readwrite");
-            const objectStore = transaction.objectStore("listPip");
-            const data = { name: name };
+        const request = indexedDB.open(dbName, 1);
 
-            const addRequest = objectStore.add(data);
-            addRequest.onsuccess = function() {
-                console.log("Name added to the database:", name);
-                $("#inputName").val("");
+        request.onupgradeneeded = function(event) {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains("list")) {
+                const objectStore = db.createObjectStore("list", { keyPath: "ssn", autoIncrement: true });
+                objectStore.createIndex("name", "name", { unique: false });
+            }
+            alert(`Database ${dbName} created with an object store "list".`);
+        };
+
+        request.onsuccess = function(event) {
+            db = event.target.result;
+            console.log("Database activated successfully.");
+        };
+
+        request.onerror = function(event) {
+            alert(`Error activating database: ${event.target.errorCode}`);
+        };
+    }
+
+    $('#addbase').click(function() {
+        const name = $('#inputName').val().trim();
+
+        if (db && name) {
+            const transaction = db.transaction(["list"], "readwrite");
+            const objectStore = transaction.objectStore("list");
+
+            const getRequest = objectStore.index("name").get(name);
+
+            getRequest.onsuccess = function(event) {
+                const result = event.target.result;
+                if (!result) {
+                    const addRequest = objectStore.add({ name: name });
+                    addRequest.onsuccess = function() {
+                        console.log("Name added to the database:", name);
+                        $('#inputName').val("");
+                    };
+                    addRequest.onerror = function(event) {
+                        console.error("Add data error:", event.target.errorCode);
+                    };
+                } else {
+                    console.log("Name already exists in the database:", name);
+                }
             };
 
-            addRequest.onerror = function(event) {
-                console.error("Add data error:", event.target.errorCode);
+            getRequest.onerror = function(event) {
+                console.error("Get data error:", event.target.errorCode);
             };
         } else {
-            alert("Please enter a database name and a name to add.");
+            alert("Please activate the database and enter a name to add.");
+        }
+    });
+
+    $('#showdata').click(function() {
+        if (db) {
+            const transaction = db.transaction(["list"], "readonly");
+            const objectStore = transaction.objectStore("list");
+
+            let resultString = "";
+            objectStore.openCursor().onsuccess = function(event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    resultString += `Name: ${cursor.value.name}, SSN: ${cursor.value.ssn}\n`;
+                    cursor.continue();
+                } else {
+                    $('#datatxt').val(resultString.trim());
+                }
+            };
+
+            transaction.onerror = function(event) {
+                console.error("Transaction error:", event.target.errorCode);
+            };
+        } else {
+            alert("Please activate the database to show data.");
         }
     });
 
     $("#delete").click(function() {
-        const dbName = $("#databaseName").val();
         const nameToDelete = $("#data").val();
 
-        if (dbName && nameToDelete) {
-            const transaction = db.transaction(["listPip"], "readwrite");
-            const objectStore = transaction.objectStore("listPip");
+        if (db && nameToDelete) {
+            const transaction = db.transaction(["list"], "readwrite");
+            const objectStore = transaction.objectStore("list");
             const index = objectStore.index("name");
 
             index.openCursor().onsuccess = function(event) {
                 const cursor = event.target.result;
                 if (cursor) {
                     if (cursor.value.name === nameToDelete) {
-                        cursor.delete().onsuccess = function() {
+                        const request = cursor.delete();
+                        request.onsuccess = function() {
                             console.log(`${nameToDelete} deleted from the database.`);
                             $("#data").val("");
                         };
@@ -80,7 +151,7 @@ $(document).ready(function() {
                 console.error("Transaction error:", event.target.errorCode);
             };
         } else {
-            alert("Please enter a database name and a name to delete.");
+            alert("Please enter a name to delete.");
         }
     });
 
@@ -103,31 +174,7 @@ $(document).ready(function() {
         }
     });
 
-    $("#showdata").click(function() {
-        const dbName = $("#databaseName").val();
 
-        if (dbName) {
-            const transaction = db.transaction(["listPip"], "readonly");
-            const objectStore = transaction.objectStore("listPip");
-
-            let resultString = "";
-            objectStore.openCursor().onsuccess = function(event) {
-                const cursor = event.target.result;
-                if (cursor) {
-                    resultString += `Name: ${cursor.value.name}, SSN: ${cursor.value.ssn}\n`;
-                    cursor.continue();
-                } else {
-                    $("#database").val(resultString.trim());
-                }
-            };
-
-            transaction.onerror = function(event) {
-                console.error("Transaction error:", event.target.errorCode);
-            };
-        } else {
-            alert("Please enter a database name to show data.");
-        }
-    });
 
     $("#showdatabase").click(function() {
         const databases = indexedDB.databases();
